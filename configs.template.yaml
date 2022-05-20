@@ -1,2 +1,8 @@
 tokenSecret: 'token secret'
 tokenExpiresIn: '30d'
+mobileCodeTime: '15 * 60 * 1000s'
+emailCodeTime: '60 * 60 * 1000'
+sendEmailCount: '5'
+sameIpSendEmailCount: '20'
+sendMobileCodeCount: '6'
+sendMobileCodeCountSameIp: '10'
