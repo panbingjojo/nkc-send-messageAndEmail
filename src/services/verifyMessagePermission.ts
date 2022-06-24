@@ -1,8 +1,8 @@
 import {
   MessageModel,
   IMessageDocument,
-  SettingModel,
-  ISettingDocument,
+  SendSettingModel,
+  ISendSettingDocument,
 } from '../models';
 import {
   HttpErrorCodes,
@@ -12,14 +12,14 @@ import {
 
 export async function ensureSendPermissionForCount(options: IMessageDocument) {
   const {uid, mobile} = options;
-  const setting = await SettingModel.findOne();
+  const setting = await SendSettingModel.findOne();
   if (setting === null) {
     return ThrowHttpError(
       HttpErrorCodes.ServiceUnavailable,
       HttpErrorMessages.ERR_SETTING_LOST,
     );
   }
-  const {sendEmailCount} = setting as ISettingDocument;
+  const {sendEmailCount} = setting as ISendSettingDocument;
   const messages = await MessageModel.find({
     uid,
     mobile,
@@ -35,14 +35,14 @@ export async function ensureSendPermissionForCount(options: IMessageDocument) {
 
 export async function ensureSendPermissionForIp(options: IMessageDocument) {
   const {ip} = options;
-  const setting = await SettingModel.findOne();
+  const setting = await SendSettingModel.findOne();
   if (setting === null) {
     return ThrowHttpError(
       HttpErrorCodes.ServiceUnavailable,
       HttpErrorMessages.ERR_SETTING_LOST,
     );
   }
-  const {sendMobileCodeCountSameIp} = setting as ISettingDocument;
+  const {sendMobileCodeCountSameIp} = setting as ISendSettingDocument;
   const messages = await MessageModel.find({ip});
   if (messages.length >= sendMobileCodeCountSameIp) {
     return ThrowHttpError(
@@ -52,6 +52,7 @@ export async function ensureSendPermissionForIp(options: IMessageDocument) {
   }
 }
 
+//验证用户消息发送权限
 export async function verifySendPermission(options: IMessageDocument) {
   await ensureSendPermissionForCount(options);
   await ensureSendPermissionForIp(options);

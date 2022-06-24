@@ -1,11 +1,12 @@
 import {SettingBaseInfo} from '../../interfaces/setting';
-import SettingModel, {ISettingDocument} from '../../models/SettingModel';
+import SendSettingModel, {
+  ISendSettingDocument,
+} from '../../models/SendSettingModel';
 export async function CreateSetting(
   settingBaseInfo: SettingBaseInfo,
-): Promise<ISettingDocument> {
+): Promise<ISendSettingDocument> {
   const {} = settingBaseInfo;
-  const setting = new SettingModel({
-  });
+  const setting = new SendSettingModel({});
   await setting.save();
   return setting;
 }

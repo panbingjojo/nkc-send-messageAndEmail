@@ -1,17 +1,18 @@
 import mongoose, {Model, Schema, IDocument} from '../modules/mongoose';
 import {ThrowHttpError} from '../modules/error';
 import {HttpErrorCodes, HttpErrorMessages} from '../modules/error';
-import {SettingModel, ISettingDocument, EmailModel} from './index';
-import {ISettingModel} from './SettingModel';
+import {SendSettingModel, ISendSettingDocument} from './index';
 
 export const ModelName = 'emails';
 
 interface IEmail {
+  _id: string;
   ip: string;
   uid: string;
   email: string;
   code: string;
   type: string;
+  verified: boolean;
   toc: Date;
   tlv: Date;
 }
@@ -25,6 +26,7 @@ export interface IEmailModel extends Model<IEmailDocument> {
 }
 
 const EmailSchema = new Schema<IEmailDocument>({
+  _id: String,
   ip: {
     type: String,
     required: true,
@@ -49,14 +51,16 @@ const EmailSchema = new Schema<IEmailDocument>({
     required: true,
     index: 1,
   },
+  verified: {
+    type: Boolean,
+    default: false,
+    index: 1,
+  },
   toc: {
     toc: Date,
-    required: true,
-    index: 1,
   },
   tlv: {
     type: Date,
-    required: true,
     index: 1,
   },
 });
@@ -76,14 +80,14 @@ EmailSchema.statics.findByUid = function (
 EmailSchema.statics.ensureSendPermissionForCount = async function (
   email: string,
 ) {
-  const setting = await SettingModel.findOne({_id: 1});
+  const setting = await SendSettingModel.findOne({_id: 1});
   if (setting === null) {
     ThrowHttpError(
       HttpErrorCodes.ServiceUnavailable,
       HttpErrorMessages.ERR_SETTING_LOST,
     );
   }
-  const {sendEmailCount} = setting as ISettingDocument;
+  const {sendEmailCount} = setting as ISendSettingDocument;
   const emails = await EmailModel.find({
     email,
     toc: {$gt: Date.now() - 24 * 60 * 60 * 1000},
@@ -101,8 +105,8 @@ EmailSchema.statics.ensureSendPermissionForCount = async function (
  * */
 EmailSchema.statics.ensureSendPermissionForIp = async function (ip: string) {
   const EmailModel = mongoose.model('emails');
-  const setting = await SettingModel.findOne({_id: 1});
-  const {sameIpSendEmailCount} = setting as ISettingDocument;
+  const setting = await SendSettingModel.findOne({_id: 1});
+  const {sameIpSendEmailCount} = setting as ISendSettingDocument;
   const emails = await EmailModel.find({
     ip,
     toc: {$gt: Date.now() - 24 * 60 * 60 * 1000},
@@ -128,7 +132,9 @@ EmailSchema.statics.VerifySendPermission = async function (options: object) {
   return true;
 };
 
-export default mongoose.model<IEmailDocument, IEmailModel>(
+const EmailModel = mongoose.model<IEmailDocument, IEmailModel>(
   ModelName,
   EmailSchema,
 );
+
+export default EmailModel;

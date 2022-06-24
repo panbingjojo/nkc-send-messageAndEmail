@@ -1,5 +1,6 @@
 tokenSecret: 'token secret'
 tokenExpiresIn: '30d'
+language: 'zh'
 mobileCodeTime: '15 * 60 * 1000s'
 emailCodeTime: '60 * 60 * 1000'
 sendEmailCount: '5'

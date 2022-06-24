@@ -1,5 +1,5 @@
 import {Context} from 'moleculer';
-import {ISettingDocument, SettingModel} from '../../models';
+import {ISendSettingDocument, SendSettingModel} from '../../models';
 
 export default {
   params: {
@@ -11,7 +11,7 @@ export default {
     sendMobileCodeCountSameIp: 'number',
   },
   async handler(ctx: Context) {
-    const params = <ISettingDocument>ctx.params;
-    await SettingModel.setSetting(params);
+    const params = <ISendSettingDocument>ctx.params;
+    await SendSettingModel.setSetting(params);
   },
 };

@@ -1,13 +1,16 @@
-import tencentCloud from './messageCore';
-import {SettingModel, ISettingDocument} from '../models';
+import {tencentCloud} from './messageCore';
+import {SendSettingModel} from '../models';
+import {ISendSetting, IMessageConfig} from '../models/SendSettingModel';
 
 interface ITemplate {
-  id?: string;
-  name?: string;
-  oid?: [];
-  validityPeriod?: number;
-  content?: string;
-  templates?: [];
+  id: string;
+  name: string;
+  oid: [];
+  validityPeriod: number | string;
+  content: string;
+  templates: [];
+  sameIpOneDay: number;
+  sameMobileOneDay: number;
 }
 
 interface IObj {
@@ -16,21 +19,25 @@ interface IObj {
   code: string;
   content: string;
   timeout: number;
+  uid: string;
+  mobile: string;
+  ip: string;
 }
 
-export const sendMessage = async (obj: IObj) => {
-  const smsSetting = await SettingModel.findOne();
-  const {type, nationCode} = obj;
-  const {templates} = smsSetting;
-  let templateId: string | undefined = undefined,
-    timeout: number,
-    content: string,
-    template: ITemplate;
+export const sendMessage = async (obj: object) => {
+  const smsSetting = (await SendSettingModel.findOne()) || {};
+  const {type, nationCode, code} = obj as IObj;
+  const {messageConfig} = smsSetting as ISendSetting;
+  const {templates} = messageConfig as IMessageConfig;
+  let templateId: string | undefined = undefined;
+  const timeout: number | undefined = undefined;
+  let content: string;
   if (templates) {
-    for (template of templates) {
-      if (template.name === type) {
-        templateId = template.id;
-        for (const o of template.oid) {
+    for (const template of templates) {
+      const {name, id, oid, validityPeriod, content: c} = template as ITemplate;
+      if (name === type) {
+        templateId = id;
+        for (const o of oid) {
           const {nationCode: oNationCode, id} = o as {
             nationCode: string;
             id: string;
@@ -40,15 +47,18 @@ export const sendMessage = async (obj: IObj) => {
             break;
           }
         }
-        timeout = template.validityPeriod;
-        content = template.content;
+        content = c;
+        content = content
+          .replace(/{code}/g, code)
+          .replace(
+            /{time}/g,
+            typeof validityPeriod === 'string' ? validityPeriod : '',
+          );
+        obj = Object.assign({}, obj, {templateId, timeout, content});
         break;
       }
     }
   }
-
   if (templateId === undefined) throw `${type}模板未定义`;
-  content = content.replace(/{code}/g, obj.code).replace(/{time}/g, timeout);
-  obj = Object.assign({}, obj, {templateId, timeout, content});
-  return tencentCloud(smsSettings, obj);
+  return tencentCloud(smsSetting, obj);
 };

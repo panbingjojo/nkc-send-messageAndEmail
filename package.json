@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn src/index.ts",
+    "dev": "ts-node-dev --respawn src/server.ts",
     "resetFolder": "rimraf dist/*",
     "compile": "tsc",
     "build": "npm-run-all resetFolder compile",
@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "@types/jest": "^27.5.1",
+    "@types/nodemailer": "^6.4.4",
     "bluebird": "^3.7.2",
     "ioredis": "^4.28.5",
     "jest": "^28.1.0",

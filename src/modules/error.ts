@@ -21,7 +21,9 @@ export const HttpErrorMessages = {
   ERR_INVALID_MOBILE: 'ERR_INVALID_MOBILE',
   ERR_USED_EMAIL: 'ERR_USED_EMAIL',
   ERR_USED_MOBILE: 'ERR_USED_MOBILE',
-  ERR_SETTING_LOST: 'ERR_SETTING_LOST'
+  ERR_SETTING_LOST: 'ERR_SETTING_LOST',
+  ERR_NO_CODE: 'ERR_NO_CODE',
+  ERR_INVALID_DB_MODEL_NAME: 'ERR_INVALID_DB_MODEL_NAME',
 };
 
 export function ThrowHttpError(code: number, message: string): MoleculerError {

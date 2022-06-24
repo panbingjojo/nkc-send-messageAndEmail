@@ -1,22 +1,21 @@
 import {Context} from 'moleculer';
-import {string} from 'yaml/dist/schema/common/string';
-import {sendMessage} from '../../modules/sendMessage';
-import {MessageModel} from '../../models';
-import {MessageBaseInfo} from '../../interfaces/message';
+import {sendMessage} from '../../services/sendMessage';
+import {IMessageDocument} from '../../models';
+import {verifySendPermission} from '../../services/verifyMessagePermission';
 
 export default {
   params: {
-    uid: string,
-    type: string,
-    nationCode: string,
-    mobile: string,
-    ip: string,
+    uid: 'string',
+    type: 'string',
+    nationCode: 'string',
+    mobile: 'string',
+    ip: 'string',
   },
   async handler(ctx: Context) {
-    const params = <MessageBaseInfo>ctx.params;
+    const params = ctx.params as IMessageDocument;
     const {uid, type, nationCode, mobile, ip} = params;
     //验证用户的短信发送权限
-    const sendPermission = await MessageModel.verifySendPermission(params);
+    const sendPermission = await verifySendPermission(params);
     if (sendPermission) {
       await sendMessage({
         nationCode,

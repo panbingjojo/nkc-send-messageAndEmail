@@ -1,6 +1,6 @@
 export interface emailBaseInfo {
   uid: string;
-  ip: string,
+  ip: string;
   email: string;
   code: string;
   type: string;

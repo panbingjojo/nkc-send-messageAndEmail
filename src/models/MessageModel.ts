@@ -1,12 +1,13 @@
 import mongoose, {Model, Schema, IDocument} from '../modules/mongoose';
-import {ISettingDocument} from './SettingModel';
+import {ISendSettingDocument} from './SendSettingModel';
 import {ThrowHttpError} from '../modules/error';
 import {HttpErrorMessages, HttpErrorCodes} from '../modules/error';
-import {SettingModel, MessageModel} from './index';
+import {SendSettingModel, MessageModel} from './index';
 
 export const ModelName = 'messages';
 
 interface IMessage {
+  _id: string;
   uid: string;
   type: string;
   nationCode: string;
@@ -25,6 +26,7 @@ export interface IMessageModel extends Model<IMessageDocument> {
 }
 
 const MessageSchema = new Schema<IMessageDocument>({
+  _id: String,
   uid: {
     type: String,
     required: true,
@@ -68,8 +70,8 @@ MessageSchema.statics.ensureSendPermissionForCount = async function (
   options: object,
 ) {
   const {uid, mobile} = options as {uid: string; mobile: string};
-  const setting = await SettingModel.findOne();
-  const {sendMobileCodeCount} = setting as ISettingDocument;
+  const setting = await SendSettingModel.findOne();
+  const {sendMobileCodeCount} = setting as ISendSettingDocument;
   const messages = await MessageModel.find({uid, mobile});
   if (messages.length >= sendMobileCodeCount) {
     return ThrowHttpError(
@@ -86,8 +88,8 @@ MessageSchema.statics.ensureSendPermissionForCount = async function (
   options: object,
 ) {
   const {ip} = options as {ip: string};
-  const setting = await SettingModel.findOne();
-  const {sendMobileCodeCountSameIp} = setting as ISettingDocument;
+  const setting = await SendSettingModel.findOne();
+  const {sendMobileCodeCountSameIp} = setting as ISendSettingDocument;
   const messages = await MessageModel.find({ip});
   if (messages.length >= sendMobileCodeCountSameIp) {
     return ThrowHttpError(

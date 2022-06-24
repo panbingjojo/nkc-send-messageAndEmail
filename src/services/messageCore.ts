@@ -1,4 +1,7 @@
 import QCloudSms from 'qcloudsms_js';
+import {MessageModel, IMessageDocument, MessageModelName} from '../models';
+import {GetNewId} from './counter';
+import Message from "../actions/send/message";
 
 /*
  * 发送短信
@@ -10,24 +13,21 @@ import QCloudSms from 'qcloudsms_js';
  *   nationCode {number}
  *   description {string} 描述
  * */
-module.exports = async (smsSettings: object, obj: object) => {
-  const {templateId, timeout, content, mobile, nationCode, description} =
-    obj as {
-      templateId: string;
-      timeout: string;
-      content: string;
-      mobile: number;
-      nationCode: string;
-      description: string;
-    };
+export const tencentCloud = async (smsSettings: object, obj: object) => {
+  const {mobile, nationCode, uid, ip, type} = obj as IMessageDocument;
+  const {templateId, content} = obj as {
+    templateId: string;
+    content: string;
+  };
   const {appId, appKey, smsSign} = smsSettings as {
     appId: string;
     appKey: string;
     smsSign: string;
   };
 
-  const sSender<any> = QCloudSms(appId, appKey).SmsSingleSender();
-  return new Promise((resolve, reject) => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+  const sSender = QCloudSms(appId, appKey).SmsSingleSender();
+  return new Promise(async (resolve, reject) => {
     const callback = (err: any, res: any, resData: any) => {
       if (err) {
         reject(err);
@@ -46,7 +46,7 @@ module.exports = async (smsSettings: object, obj: object) => {
       }
     };
     const params = [content];
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     sSender.sendWithParam(
       nationCode ? parseInt(nationCode) : 86,
       mobile,
@@ -57,5 +57,17 @@ module.exports = async (smsSettings: object, obj: object) => {
       '',
       callback,
     );
+    //创建消息发送记录
+    const messageId = await GetNewId(MessageModelName);
+    const newMessageRecord = new MessageModel({
+      _id: messageId,
+      uid,
+      type,
+      nationCode,
+      mobile,
+      ip,
+      toc: new Date(),
+    });
+    await newMessageRecord.save();
   });
 };

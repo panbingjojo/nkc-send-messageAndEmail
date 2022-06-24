@@ -8,3 +8,8 @@ export const broker = new ServiceBroker({
     discoverer: 'Local',
   },
 });
+
+export const ServiceActionNames = {
+  v1_verification_verify_send_email: 'v1_verification_verify_send_email',
+  v1_verification_verify_send_message: 'v1_verification_verify_send_message',
+};

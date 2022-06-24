@@ -1,5 +1,3 @@
-export interface SettingBaseInfo {
-}
+export interface SettingBaseInfo {}
 
-export interface SettingPublicInfo {
-};
+export interface SettingPublicInfo {}
